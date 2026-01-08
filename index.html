@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kickflip 1st Anniversary Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- v5.1 樣式設計 (包含音樂按鈕 + 浮水印) --- */
+        :root {
+            --primary-color: #FF5A5F;
+            --accent-color: #FF8E92;
+            --bg-color: #F7F8FA;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-dark: #333333;
+            --text-light: #666666;
+            --shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: 'Noto Sans KR', 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-dark);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            margin: 20px;
+            padding: 30px 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- 新增：浮水印樣式 --- */
+        .watermark {
+            position: absolute;
+            bottom: 8px;   /* 距離底部 */
+            right: 12px;   /* 距離右邊 */
+            font-size: 11px;
+            color: rgba(0, 0, 0, 0.2); /* 黑色，但透明度20%，非常淡 */
+            font-weight: bold;
+            z-index: 5;
+            pointer-events: none; /* 讓點擊穿透，不會擋到按鈕 */
+            font-family: sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        /* 音樂控制按鈕 (左上角) */
+        .music-control {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+        }
+        .music-btn {
+            background: rgba(255,255,255,0.8);
+            border: 1px solid #ddd;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%; /* 圓形 */
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+        .music-btn.playing {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            animation: spin 4s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* 語言切換 (右上角) */
+        .lang-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+        .lang-btn {
+            background: rgba(255,255,255,0.8);
+            border: 1px solid #ddd;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: 0.2s;
+        }
+        .lang-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        h1 {
+            font-size: 26px;
+            margin-bottom: 10px;
+            margin-top: 0;
+            color: var(--primary-color);
+            letter-spacing: -0.5px;
+        }
+        p {
+            font-size: 15px;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 20px;
+            margin: 8px 0;
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 16px;
+            font-size: 15px;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn:hover {
+            border-color: var(--accent-color);
+            background: #fff5f5;
+        }
+        
+        #start-btn, #restart-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(255, 90, 95, 0.4);
+            margin-top: 20px;
+        }
+
+        #start-logo {
+            width: 180px;
+            height: auto;
+            margin-bottom: 25px;
+        }
+
+        #question-img {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        #result-img {
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            margin: 15px 0;
+            display: block;
+            border: 4px solid white;
+        }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.5s forwards; }
+        .slide-up { animation: slideUp 0.5s forwards; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .footer {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: auto;
+            padding-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="card slide-up">
+        
+        <div class="watermark">@weflip.0526</div>
+
+        <div class="music-control">
+            <button class="music-btn" onclick="toggleMusic()" id="music-btn">🎵</button>
+        </div>
+        <audio id="bgm" src="bgm.mp3" loop></audio>
+
+        <div class="lang-switch">
+            <button class="lang-btn active" onclick="setLang('zh', this)">中</button>
+            <button class="lang-btn" onclick="setLang('kr', this)">한</button>
+            <button class="lang-btn" onclick="setLang('en', this)">EN</button>
+        </div>
+
+        <div class="progress-bar-container" id="progress-container">
+            <div class="progress-bar" id="progress-fill"></div>
+        </div>
+
+        <div id="start-screen">
+            <img id="start-logo" src="logo.png" alt="Kickflip Logo" class="fade-in">
+            <h1 id="title-text">讓我們跟 Kickflip 一起歡度一周年吧</h1>
+            <p id="subtitle-text">測驗出你在 Kickflip 裡的命定夥伴！</p>
+            <button class="btn" onclick="startQuiz()" id="start-btn">開始測驗</button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <img id="question-img" src="" alt="Question Image" class="fade-in">
+            <h2 id="question-text" style="font-size: 20px; margin-bottom: 20px; color:#333;">題目載入中...</h2>
+            <div id="options-container"></div>
+        </div>
+
+        <div id="result-screen" class="hidden">
+            <h2 id="result-title" style="color:var(--primary-color);">你的命定成員是...</h2>
+            <img id="result-img" src="" alt="Result Card">
+            <p id="result-desc" style="font-weight:bold; font-size:18px; margin:10px 0; white-space: pre-line;"></p>
+            <p style="font-size: 0.85em; color: #999; background:#f5f5f5; padding:5px 10px; border-radius:20px; display:inline-block;" id="save-hint">長按圖片即可儲存小卡</p>
+            <button class="btn" onclick="location.reload()" id="restart-btn">再測一次</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        © Kickflip 1st Anniversary Fan Project
+    </div>
+</div>
+
+<script>
+    /* --- 資料設定區 --- */
+    const texts = {
+        zh: {
+            title: "Kickflip 一週年紀念",
+            subtitle: "測驗出你在 Kickflip 裡的命定夥伴！",
+            start: "開始測驗",
+            resultTitle: "你的命定成員是...",
+            saveHint: "長按圖片即可儲存小卡 (再測一次也許會有不同小卡喔!)", 
+            restart: "再玩一次",
+            questions: [
+                {
+                    q: "Q1.【生存情境】如果不幸流落到無人島，只能帶一位成員，你會選擇具備甚麼技能的成員？",
+                    opts: ["A. 挖洞 ", "B. 狩獵 ", "C. 搭建/生火 ", "D. 料理 ", "E. 躺平/負責吃 "]
+                },
+                {
+                    q: "Q2.【校園情境】新學期換座位，如果可以自己選擇，你最希望你的「同桌」是哪種類型？",
+                    opts: ["A. 上課偷偷傳紙條、一起吃零食", "B. 筆記超完美的學霸，考試神隊友", "C. 默默幫你擋陽光、借文具的暖男", "D. 體育課Carry全場，保護你的校霸"]
+                },
+                {
+                    q: "Q3.【旅行情境】Kickflip 一週年了！如果成員邀請你去三天兩夜的旅行，你最期待哪種行程？",
+                    opts: ["A. 沒行程，睡到自然醒，隨意吃喝拍照", "B. 刺激活動！高空彈跳、衝浪、遊樂園", "C. 溫馨路線，一起買菜煮火鍋、玩桌遊"]
+                },
+                {
+                    q: "Q4.【危機情境】迷路了手機又快沒電，跟哪位成員在一起你會最安心？",
+                    opts: ["A. 雖然也迷路，但牽著你的手說「別怕」", "B. 立刻拿地圖或看太陽辨位的可靠派", "C. 完全不緊張，拉著你去買冰淇淋的樂天派"]
+                },
+                {
+                    q: "Q5.【入坑瞬間】這一年來，Kickflip 最讓你「入坑」的瞬間是？",
+                    opts: ["A. 舞台上揮灑汗水、眼神充滿殺氣", "B. 直播時跟粉絲互懟、聊心事的真誠", "C. 簽售會上溫柔注視、記得粉絲名字"]
+                }
+            ]
+        },
+        kr: {
+            title: "킥플립 1주년, 우리 함께 축하해요!",
+            subtitle: "당신의 운명의 멤버는 누구일까요?",
+            start: "시작하기",
+            resultTitle: "당신의 운명의 멤버는...",
+            saveHint: "이미지를 길게 눌러 저장하세요 (다시 하면 다른 카드가 나올지도?)",
+            restart: "다시 하기",
+            questions: [
+                {
+                    q: "Q1. [생존상황] 만약 무인도에 표류한다면, 어떤 능력을 가진 멤버를 선택하겠습니까?",
+                    opts: ["A. 굴파기 ", "B. 사냥 ", "C. 세움/불 피우기 ", "D. 요리 ", "E. 눕방 담당 "]
+                },
+                {
+                    q: "Q2. [캠퍼스] 새 학기 자리 배치! 당신이 원하는 '짝꿍' 유형은?",
+                    opts: ["A. 몰래 쪽지 보내고 간식 나눠 먹는 친구", "B. 필기 완벽! 시험 기간 구세주인 모범생", "C. 묵묵히 햇빛 막아주고 지우개 빌려주는 훈남", "D. 체육 시간 하드캐리! 든든한 학교 짱"]
+                },
+                {
+                    q: "Q3. [여행] 킥플립 1주년 여행! 어떤 일정이 가장 기대되나요?",
+                    opts: ["A. 계획 NO! 늦잠 자고 맛집 탐방 & 인생샷", "B. 스릴 만점! 번지점프, 서핑, 놀이공원", "C. 아늑한 코스, 마트 장보기 & 보드게임"]
+                },
+                {
+                    q: "Q4. [위기] 길을 잃고 배터리도 없을 때, 가장 안심되는 멤버는?",
+                    opts: ["A. 손 잡고 '걱정 마, 내가 있잖아' 해주는 멤버", "B. 지도나 태양을 보고 길을 찾는 든든한 멤버", "C. 긴장감 제로! 아이스크림 사러 가자는 긍정왕"]
+                },
+                {
+                    q: "Q5. [입덕] 지난 1년, 킥플립에게 거하게 '입덕'해버린 순간은?",
+                    opts: ["A. 무대 위 땀방울, 카리스마 넘치는 눈빛", "B. 라방에서 친구처럼 티격태격하는 진솔함", "C. 다정한 눈빛으로 이름 기억해주는 다정함"]
+                }
+            ]
+        },
+        en: {
+            title: "Kickflip's 1st Anniversary!",
+            subtitle: "Find out who your destined partner is!",
+            start: "Start Quiz",
+            resultTitle: "Your destined member is...",
+            saveHint: "Long press image to save (Try again for a different card!)",
+            restart: "Play Again",
+            questions: [
+                {
+                    q: "Q1. [Survival] Stranded on an island, which skill would you choose in a partner?",
+                    opts: ["A. Digging ", "B. Hunting ", "C. Building/Fire ", "D. Cooking ", "E. Just chilling "]
+                },
+                {
+                    q: "Q2. [Campus] New semester! Which seatmate do you want?",
+                    opts: ["A. Secretly passing notes & snacking.", "B. Perfect note-taker who saves your grades.", "C. Quiet warm guy who shields you from sun.", "D. Athletic ace who protects you."]
+                },
+                {
+                    q: "Q3. [Travel] Kickflip trip! Which itinerary do you prefer?",
+                    opts: ["A. No plans, sleeping in, food & photos.", "B. Thrilling: Bungee, surfing, parks.", "C. Cozy: Grocery shopping, hotpot, games."]
+                },
+                {
+                    q: "Q4. [Crisis] Lost with no battery. Who makes you safe?",
+                    opts: ["A. Holds hand saying 'Don't worry'.", "B. Reliable navigator with a map.", "C. Optimist who buys ice cream instead."]
+                },
+                {
+                    q: "Q5. [Fan Moment] When did you fall in love with Kickflip?",
+                    opts: ["A. Charismatic gaze on stage.", "B. Playful bickering on live stream.", "C. Warmly remembering fans' names."]
+                }
+            ]
+        }
+    };
+
+    const questionImages = ["q1.jpg", "q2.jpg", "q3.jpg", "q4.jpg", "q5.jpg"];
+
+    const members = [
+        { 
+            id: 'A', 
+            name: "Lee Gye Hun", 
+            imgs: ["member_a_01.jpg", "member_a_02.jpg"], 
+            desc: "Reliable Leader\n像隊長一樣，你需要一個能帶領你前進的可靠夥伴！" 
+        },
+        { 
+            id: 'B', 
+            name: "Mitsuyuki Amaru", 
+            imgs: ["member_b_01.jpg", "member_b_02.jpg"], 
+            desc: "Persistent & Artistic\n像亞丸一樣，堅持到底的藝術家靈魂最吸引你！" 
+        },
+        { 
+            id: 'C', 
+            name: "Lee Dong Hwa", 
+            imgs: ["member_c_01.jpg", "member_c_02.jpg"], 
+            desc: "Witty & Smart\n像東花一樣，機智幽默又聰明的男孩是你的天菜！" 
+        },
+        { 
+            id: 'D', 
+            name: "Jang Ju Wang", 
+            imgs: ["member_d_01.jpg", "member_d_02.jpg"], 
+            desc: "Main Vocal & Foodie\n像主汪一樣，能陪你吃遍美食、唱情歌給你聽的他是最棒的！" 
+        },
+        { 
+            id: 'E', 
+            name: "Choi Min Je", 
+            imgs: ["member_e_01.jpg", "member_e_02.jpg"], 
+            desc: "Shy & Loyal\n像旻帝一樣，害羞卻忠誠的大狗狗型男友最讓你心動！" 
+        },
+        { 
+            id: 'F', 
+            name: "Okamoto Keiju", 
+            imgs: ["member_f_01.jpg", "member_f_02.jpg"], 
+            desc: "Cute & Cat-like\n像佳樹一樣，有點傲嬌但超級可愛的貓咪系男孩！" 
+        },
+        { 
+            id: 'G', 
+            name: "Lee Dong Hyeon", 
+            imgs: ["member_g_01.jpg", "member_g_02.jpg"], 
+            desc: "Sporty Maknae\n像東玹一樣，充滿活力的運動少年能帶給你滿滿能量！" 
+        }
+    ];
+
+    const scores = [0, 0, 0, 0, 0, 0, 0];
+    const logic = [
+        [[1], [6, 0], [2, 4], [3], [5]], 
+        [[2, 3], [1, 0], [4], [6, 5]], 
+        [[3, 5], [6, 2], [4, 0, 1]], 
+        [[0, 4], [1, 2], [5, 3]], 
+        [[5, 6], [2, 0], [4, 1]] 
+    ];
+
+    /* --- 邏輯控制區 --- */
+    let currentLang = 'zh';
+    let currentQ = 0;
+    const totalQ = 5;
+
+    // 音樂控制
+    const bgm = document.getElementById('bgm');
+    bgm.volume = 0.5; 
+
+    function toggleMusic() {
+        const btn = document.getElementById('music-btn');
+        if (bgm.paused) {
+            bgm.play().then(() => {
+                btn.classList.add('playing');
+                btn.innerHTML = '🎵'; 
+            }).catch(e => console.log("等待互動才能播放"));
+        } else {
+            bgm.pause();
+            btn.classList.remove('playing');
+        }
+    }
+
+    function setLang(lang, btnElement) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        if(btnElement) btnElement.classList.add('active');
+        
+        document.getElementById('title-text').innerText = texts[lang].title;
+        document.getElementById('subtitle-text').innerText = texts[lang].subtitle;
+        document.getElementById('start-btn').innerText = texts[lang].start;
+        document.getElementById('result-title').innerText = texts[lang].resultTitle;
+        document.getElementById('save-hint').innerText = texts[lang].saveHint;
+        document.getElementById('restart-btn').innerText = texts[lang].restart;
+        
+        if (!document.getElementById('quiz-screen').classList.contains('hidden')) {
+            document.getElementById('question-text').innerText = texts[lang].questions[currentQ].q;
+            const qData = texts[lang].questions[currentQ];
+            const optsContainer = document.getElementById('options-container');
+            optsContainer.innerHTML = '';
+            qData.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.innerText = opt;
+                btn.onclick = () => nextQuestion(idx);
+                optsContainer.appendChild(btn);
+            });
+        }
+    }
+
+    function startQuiz() {
+        const musicBtn = document.getElementById('music-btn');
+        bgm.play().then(() => {
+            musicBtn.classList.add('playing');
+        }).catch(e => {
+            console.log("瀏覽器阻擋自動播放");
+        });
+
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        document.getElementById('progress-container').style.display = 'block';
+        currentQ = 0;
+        scores.fill(0);
+        updateProgress();
+        showQuestion();
+    }
+
+    function updateProgress() {
+        const percentage = ((currentQ) / totalQ) * 100;
+        document.getElementById('progress-fill').style.width = percentage + '%';
+    }
+
+    function showQuestion() {
+        const qData = texts[currentLang].questions[currentQ];
+        
+        const qImg = document.getElementById('question-img');
+        qImg.src = questionImages[currentQ]; 
+        qImg.style.display = 'block';
+        
+        const qDiv = document.getElementById('quiz-screen');
+        qDiv.classList.remove('slide-up');
+        void qDiv.offsetWidth; 
+        qDiv.classList.add('slide-up');
+
+        document.getElementById('question-text').innerText = qData.q;
+        const optsContainer = document.getElementById('options-container');
+        optsContainer.innerHTML = '';
+
+        qData.opts.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.innerText = opt;
+            btn.onclick = () => nextQuestion(idx);
+            optsContainer.appendChild(btn);
+        });
+        
+        document.getElementById('progress-fill').style.width = ((currentQ + 1) / totalQ * 100) + '%';
+    }
+
+    function nextQuestion(choiceIdx) {
+        const points = logic[currentQ][choiceIdx];
+        if (points) points.forEach(i => scores[i]++);
+
+        currentQ++;
+        if (currentQ < totalQ) {
+            showQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('progress-container').style.display = 'none';
+        document.getElementById('result-screen').classList.remove('hidden');
+
+        let maxScore = -1;
+        let winners = [];
+        for(let i=0; i<7; i++) {
+            if (scores[i] > maxScore) {
+                maxScore = scores[i];
+                winners = [i];
+            } else if (scores[i] === maxScore) {
+                winners.push(i);
+            }
+        }
+        const winnerIdx = winners[Math.floor(Math.random() * winners.length)];
+        const resultMember = members[winnerIdx];
+
+        const randomImg = resultMember.imgs[Math.floor(Math.random() * resultMember.imgs.length)];
+
+        document.getElementById('result-img').src = randomImg;
+        document.getElementById('result-desc').innerText = resultMember.name + "\n" + resultMember.desc;
+        
+        document.getElementById('result-img').onerror = function() {
+            this.style.display = 'none';
+            document.getElementById('result-desc').innerText += "\n(圖片尚未準備好: " + randomImg + ")";
+        };
+    }
+</script>
+
+</body>
+</html>
