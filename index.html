@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- v6.1 樣式設計 --- */
+        /* --- v6.2 樣式設計 --- */
         :root {
             --primary-color: #FF5A5F;
             --accent-color: #FF8E92;
@@ -45,8 +45,8 @@
             border-radius: 24px;
             margin: 20px;
             padding: 30px 20px;
-            /* 為了給下方按鈕留空間，稍微增加 padding-bottom */
-            padding-bottom: 50px; 
+            /* ★★★ 修改重點：加大底部留白，給返回鍵更多空間，避免跟選項打架 ★★★ */
+            padding-bottom: 80px; 
             box-shadow: var(--shadow);
             text-align: center;
             flex: 1;
@@ -71,24 +71,24 @@
             letter-spacing: 0.5px;
         }
 
-        /* --- 控制列 (音樂/語言) --- */
+        /* --- 控制列 --- */
         .top-bar {
             position: absolute;
             top: 20px;
             left: 0;
             width: 100%;
             display: flex;
-            justify-content: space-between; /* 左右分佈 */
+            justify-content: space-between;
             align-items: center;
             padding: 0 20px;
             box-sizing: border-box;
             z-index: 10;
         }
 
-        /* ★★★ 新增：左下角上一題按鈕樣式 ★★★ */
+        /* ★★★ 修改重點：返回鍵位置微調，貼近底部 ★★★ */
         .back-btn {
             position: absolute;
-            bottom: 20px;
+            bottom: 15px; /* 再低一點點 */
             left: 20px;
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid #ddd;
@@ -99,8 +99,10 @@
             color: var(--text-light);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             z-index: 20;
-            display: none; /* 預設隱藏 */
+            display: none;
             transition: all 0.2s;
+            /* 防止手機點擊產生藍色框框 */
+            -webkit-tap-highlight-color: transparent;
         }
         .back-btn:active {
             transform: scale(0.95);
@@ -130,7 +132,7 @@
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* 語言按鈕群組 */
+        /* 語言按鈕 */
         .lang-group {
             display: flex;
             gap: 5px;
@@ -181,10 +183,8 @@
             transition: width 0.3s ease;
         }
 
-        /* 選項按鈕容器 */
         #options-container {
             width: 100%;
-            /* 用於防止連點的樣式 */
             transition: opacity 0.2s; 
         }
 
@@ -205,14 +205,22 @@
             user-select: none; 
             -webkit-tap-highlight-color: transparent;
         }
-        /* 當被選中時的樣式 */
+        
+        /* 選中狀態 (紅色框) */
         .btn.selected {
-            border-color: var(--primary-color);
-            background: #fff5f5;
+            border-color: var(--primary-color) !important;
+            background: #fff5f5 !important;
             transform: scale(0.98);
         }
-        .btn:hover {
-            border-color: var(--accent-color);
+
+        /* ★★★ 修改重點：修復手機紅框殘影 ★★★ */
+        /* 只有在支援 hover 的設備(電腦)上，才顯示 hover 效果 */
+        /* 這樣手機點擊後，就不會殘留 hover 的顏色 */
+        @media (hover: hover) {
+            .btn:hover {
+                border-color: var(--accent-color);
+                background: #fff5f5;
+            }
         }
         
         #start-btn, #restart-btn {
@@ -437,13 +445,10 @@
         [[5, 6], [2, 0], [4, 1]] 
     ];
 
-    /* --- 邏輯控制區 --- */
     let currentLang = 'zh';
     let currentQ = 0;
     const totalQ = 5;
     let userAnswers = [-1, -1, -1, -1, -1];
-    
-    // ★ 防止連點鎖
     let isTransitioning = false; 
 
     const bgm = document.getElementById('bgm');
@@ -483,7 +488,6 @@
     function startQuiz() {
         const musicBtn = document.getElementById('music-btn');
         bgm.play().then(() => {
-            // ★ 修改：從 25 秒開始播放
             bgm.currentTime = 25; 
             musicBtn.classList.add('playing');
         }).catch(e => {
@@ -506,10 +510,9 @@
     }
 
     function showQuestion() {
-        // 解除按鈕鎖定
         isTransitioning = false;
         const optsContainer = document.getElementById('options-container');
-        optsContainer.style.pointerEvents = 'auto'; // 恢復可點擊
+        optsContainer.style.pointerEvents = 'auto';
 
         const backBtn = document.getElementById('back-btn');
         if (currentQ > 0) {
@@ -553,11 +556,9 @@
     }
 
     function handleAnswer(choiceIdx, btnElement) {
-        // ★ 防止重複點擊的關鍵邏輯
         if (isTransitioning) return;
-        isTransitioning = true; // 鎖定
+        isTransitioning = true;
 
-        // 鎖定整個容器，禁止再次點擊任何按鈕
         document.getElementById('options-container').style.pointerEvents = 'none';
 
         const allBtns = document.getElementById('options-container').querySelectorAll('.btn');
@@ -566,7 +567,6 @@
 
         userAnswers[currentQ] = choiceIdx;
 
-        // 延遲跳轉
         setTimeout(() => {
             nextQuestion();
         }, 300);
@@ -582,7 +582,6 @@
     }
 
     function prevQuestion() {
-        // 如果正在過場中，不允許返回，避免邏輯打架
         if (isTransitioning) return;
         
         if (currentQ > 0) {
