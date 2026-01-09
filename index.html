@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- v6.0 樣式設計 --- */
+        /* --- v6.1 樣式設計 --- */
         :root {
             --primary-color: #FF5A5F;
             --accent-color: #FF8E92;
@@ -45,6 +45,8 @@
             border-radius: 24px;
             margin: 20px;
             padding: 30px 20px;
+            /* 為了給下方按鈕留空間，稍微增加 padding-bottom */
+            padding-bottom: 50px; 
             box-shadow: var(--shadow);
             text-align: center;
             flex: 1;
@@ -69,30 +71,40 @@
             letter-spacing: 0.5px;
         }
 
-        /* --- 上方控制列 (上一題/音樂/語言) --- */
+        /* --- 控制列 (音樂/語言) --- */
         .top-bar {
             position: absolute;
             top: 20px;
             left: 0;
             width: 100%;
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; /* 左右分佈 */
             align-items: center;
             padding: 0 20px;
             box-sizing: border-box;
             z-index: 10;
         }
 
-        /* 上一題按鈕 */
+        /* ★★★ 新增：左下角上一題按鈕樣式 ★★★ */
         .back-btn {
-            background: rgba(255,255,255,0.8);
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
             border: 1px solid #ddd;
-            padding: 5px 10px;
-            border-radius: 12px;
-            font-size: 13px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
             cursor: pointer;
             color: var(--text-light);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 20;
             display: none; /* 預設隱藏 */
+            transition: all 0.2s;
+        }
+        .back-btn:active {
+            transform: scale(0.95);
+            background: #f0f0f0;
         }
 
         /* 音樂按鈕 */
@@ -169,6 +181,13 @@
             transition: width 0.3s ease;
         }
 
+        /* 選項按鈕容器 */
+        #options-container {
+            width: 100%;
+            /* 用於防止連點的樣式 */
+            transition: opacity 0.2s; 
+        }
+
         .btn {
             width: 100%;
             padding: 16px 20px;
@@ -183,11 +202,11 @@
             text-align: left;
             position: relative;
             box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-            /* 禁止選取文字，避免手機雙擊變藍色 */
             user-select: none; 
             -webkit-tap-highlight-color: transparent;
         }
-        .btn:active, .btn.selected {
+        /* 當被選中時的樣式 */
+        .btn.selected {
             border-color: var(--primary-color);
             background: #fff5f5;
             transform: scale(0.98);
@@ -254,11 +273,11 @@
     <div class="card slide-up">
         <div class="watermark">@weflip.0526</div>
 
-        <div class="top-bar">
-            <button class="back-btn" id="back-btn" onclick="prevQuestion()">
-                &lt; Back
-            </button>
+        <button class="back-btn" id="back-btn" onclick="prevQuestion()">
+            &lt; Back
+        </button>
 
+        <div class="top-bar">
             <button class="music-btn" onclick="toggleMusic()" id="music-btn">🎵</button>
             <audio id="bgm" src="bgm.mp3" loop></audio>
 
@@ -401,37 +420,15 @@
     const questionImages = ["q1.jpg", "q2.jpg", "q3.jpg", "q4.jpg", "q5.jpg"];
 
     const members = [
-        { 
-            id: 'A', name: "Lee Gye Hun", imgs: ["member_a_01.jpg", "member_a_02.jpg"], 
-            desc: "Reliable Leader\n像隊長一樣，你需要一個能帶領你前進的可靠夥伴！" 
-        },
-        { 
-            id: 'B', name: "Mitsuyuki Amaru", imgs: ["member_b_01.jpg", "member_b_02.jpg"], 
-            desc: "Persistent & Artistic\n像亞丸一樣，堅持到底的藝術家靈魂最吸引你！" 
-        },
-        { 
-            id: 'C', name: "Lee Dong Hwa", imgs: ["member_c_01.jpg", "member_c_02.jpg"], 
-            desc: "Witty & Smart\n像東花一樣，機智幽默又聰明的男孩是你的天菜！" 
-        },
-        { 
-            id: 'D', name: "Jang Ju Wang", imgs: ["member_d_01.jpg", "member_d_02.jpg"], 
-            desc: "Main Vocal & Foodie\n像主汪一樣，能陪你吃遍美食、唱情歌給你聽的他是最棒的！" 
-        },
-        { 
-            id: 'E', name: "Choi Min Je", imgs: ["member_e_01.jpg", "member_e_02.jpg"], 
-            desc: "Shy & Loyal\n像旻帝一樣，害羞卻忠誠的大狗狗型男友最讓你心動！" 
-        },
-        { 
-            id: 'F', name: "Okamoto Keiju", imgs: ["member_f_01.jpg", "member_f_02.jpg"], 
-            desc: "Cute & Cat-like\n像佳樹一樣，有點傲嬌但超級可愛的貓咪系男孩！" 
-        },
-        { 
-            id: 'G', name: "Lee Dong Hyeon", imgs: ["member_g_01.jpg", "member_g_02.jpg"], 
-            desc: "Sporty Maknae\n像東玹一樣，充滿活力的運動少年能帶給你滿滿能量！" 
-        }
+        { id: 'A', name: "Lee Gye Hun", imgs: ["member_a_01.jpg", "member_a_02.jpg"], desc: "Reliable Leader\n像隊長一樣，你需要一個能帶領你前進的可靠夥伴！" },
+        { id: 'B', name: "Mitsuyuki Amaru", imgs: ["member_b_01.jpg", "member_b_02.jpg"], desc: "Persistent & Artistic\n像亞丸一樣，堅持到底的藝術家靈魂最吸引你！" },
+        { id: 'C', name: "Lee Dong Hwa", imgs: ["member_c_01.jpg", "member_c_02.jpg"], desc: "Witty & Smart\n像東花一樣，機智幽默又聰明的男孩是你的天菜！" },
+        { id: 'D', name: "Jang Ju Wang", imgs: ["member_d_01.jpg", "member_d_02.jpg"], desc: "Main Vocal & Foodie\n像主汪一樣，能陪你吃遍美食、唱情歌給你聽的他是最棒的！" },
+        { id: 'E', name: "Choi Min Je", imgs: ["member_e_01.jpg", "member_e_02.jpg"], desc: "Shy & Loyal\n像旻帝一樣，害羞卻忠誠的大狗狗型男友最讓你心動！" },
+        { id: 'F', name: "Okamoto Keiju", imgs: ["member_f_01.jpg", "member_f_02.jpg"], desc: "Cute & Cat-like\n像佳樹一樣，有點傲嬌但超級可愛的貓咪系男孩！" },
+        { id: 'G', name: "Lee Dong Hyeon", imgs: ["member_g_01.jpg", "member_g_02.jpg"], desc: "Sporty Maknae\n像東玹一樣，充滿活力的運動少年能帶給你滿滿能量！" }
     ];
 
-    // 計分權重
     const logic = [
         [[1], [6, 0], [2, 4], [3], [5]], 
         [[2, 3], [1, 0], [4], [6, 5]], 
@@ -444,10 +441,10 @@
     let currentLang = 'zh';
     let currentQ = 0;
     const totalQ = 5;
-    
-    // 用來記錄每一題使用者選了哪個 index (初始為 -1 代表沒選)
-    // 這樣就可以支援「返回修改」而不重複加分
     let userAnswers = [-1, -1, -1, -1, -1];
+    
+    // ★ 防止連點鎖
+    let isTransitioning = false; 
 
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.5; 
@@ -476,7 +473,7 @@
         document.getElementById('result-title').innerText = texts[lang].resultTitle;
         document.getElementById('save-hint').innerText = texts[lang].saveHint;
         document.getElementById('restart-btn').innerText = texts[lang].restart;
-        document.getElementById('back-btn').innerText = texts[lang].back; // 更新上一題按鈕語言
+        document.getElementById('back-btn').innerText = texts[lang].back; 
         
         if (!document.getElementById('quiz-screen').classList.contains('hidden')) {
             renderQuestionContent();
@@ -486,7 +483,7 @@
     function startQuiz() {
         const musicBtn = document.getElementById('music-btn');
         bgm.play().then(() => {
-            // ★ 設定從 20 秒開始播放 (跳過前奏)
+            // ★ 修改：從 25 秒開始播放
             bgm.currentTime = 25; 
             musicBtn.classList.add('playing');
         }).catch(e => {
@@ -497,8 +494,8 @@
         document.getElementById('quiz-screen').classList.remove('hidden');
         document.getElementById('progress-container').style.display = 'block';
         currentQ = 0;
-        // 重置答案紀錄
         userAnswers = [-1, -1, -1, -1, -1];
+        isTransitioning = false;
         updateProgress();
         showQuestion();
     }
@@ -509,7 +506,11 @@
     }
 
     function showQuestion() {
-        // 控制「上一題」按鈕顯示
+        // 解除按鈕鎖定
+        isTransitioning = false;
+        const optsContainer = document.getElementById('options-container');
+        optsContainer.style.pointerEvents = 'auto'; // 恢復可點擊
+
         const backBtn = document.getElementById('back-btn');
         if (currentQ > 0) {
             backBtn.style.display = 'block';
@@ -542,7 +543,6 @@
             btn.className = 'btn';
             btn.innerText = opt;
             
-            // 如果之前選過這題（返回時），標記為選中狀態
             if (userAnswers[currentQ] === idx) {
                 btn.classList.add('selected');
             }
@@ -553,15 +553,20 @@
     }
 
     function handleAnswer(choiceIdx, btnElement) {
-        // 1. 視覺回饋：讓按鈕變色
+        // ★ 防止重複點擊的關鍵邏輯
+        if (isTransitioning) return;
+        isTransitioning = true; // 鎖定
+
+        // 鎖定整個容器，禁止再次點擊任何按鈕
+        document.getElementById('options-container').style.pointerEvents = 'none';
+
         const allBtns = document.getElementById('options-container').querySelectorAll('.btn');
         allBtns.forEach(b => b.classList.remove('selected'));
         btnElement.classList.add('selected');
 
-        // 2. 記錄答案
         userAnswers[currentQ] = choiceIdx;
 
-        // 3. 延遲 300ms 再跳下一題，解決「殘影/誤觸」錯覺
+        // 延遲跳轉
         setTimeout(() => {
             nextQuestion();
         }, 300);
@@ -576,8 +581,10 @@
         }
     }
 
-    // 新增：上一題功能
     function prevQuestion() {
+        // 如果正在過場中，不允許返回，避免邏輯打架
+        if (isTransitioning) return;
+        
         if (currentQ > 0) {
             currentQ--;
             showQuestion();
@@ -587,16 +594,13 @@
     function calculateAndShowResult() {
         document.getElementById('quiz-screen').classList.add('hidden');
         document.getElementById('progress-container').style.display = 'none';
-        document.getElementById('back-btn').style.display = 'none'; // 隱藏上一題按鈕
+        document.getElementById('back-btn').style.display = 'none';
         document.getElementById('result-screen').classList.remove('hidden');
 
-        // --- 最終計分邏輯 ---
-        // 根據 userAnswers 陣列重新計算總分
         let finalScores = [0, 0, 0, 0, 0, 0, 0];
-        
         for (let qIdx = 0; qIdx < totalQ; qIdx++) {
             const choice = userAnswers[qIdx];
-            if (choice !== -1) { // 確保有作答
+            if (choice !== -1) { 
                 const pointsToAdd = logic[qIdx][choice];
                 if (pointsToAdd) {
                     pointsToAdd.forEach(memberId => {
@@ -606,7 +610,6 @@
             }
         }
 
-        // 找出最高分
         let maxScore = -1;
         let winners = [];
         for(let i=0; i<7; i++) {
@@ -619,8 +622,6 @@
         }
         const winnerIdx = winners[Math.floor(Math.random() * winners.length)];
         const resultMember = members[winnerIdx];
-
-        // 隨機選圖
         const randomImg = resultMember.imgs[Math.floor(Math.random() * resultMember.imgs.length)];
 
         document.getElementById('result-img').src = randomImg;
@@ -635,4 +636,3 @@
 
 </body>
 </html>
-
